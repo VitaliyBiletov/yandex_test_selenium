@@ -133,3 +133,6 @@ dmypy.json
 
 #geckodriver
 geckodriver.log
+
+#logs
+.logs

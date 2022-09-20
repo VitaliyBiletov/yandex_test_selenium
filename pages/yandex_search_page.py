@@ -1,3 +1,5 @@
+from loguru import logger
+from selenium.common import TimeoutException
 from selenium.webdriver import Keys
 from pages.base_page import BasePage
 from selenium.webdriver.support.wait import WebDriverWait
@@ -16,7 +18,8 @@ class YandexSearchPage(BasePage):
 
     def should_be_input_field(self):
         """Проверяет наличие поля поиска"""
-        assert self.is_element_present(*YandexSearchLocators.INPUT_FIELD)
+        assert self.is_element_present(*YandexSearchLocators.INPUT_FIELD),\
+            logger.error("Отстутсвует поле поиска")
 
     def entering_text_in_the_input_field(self):
         """Получает элемент поля поиска и вводит туда текст"""
@@ -25,7 +28,8 @@ class YandexSearchPage(BasePage):
 
     def should_be_suggest(self):
         """Проверяет наличие таблицы с подсказками"""
-        assert self.is_element_present(*YandexSearchLocators.SUGGEST_ELEMENT), "Таблица с подсказками отсутствует"
+        assert self.is_element_present(*YandexSearchLocators.SUGGEST_ELEMENT), \
+            logger.error("Таблица с подсказками отсутствует")
 
     def click_to_enter(self):
         """
@@ -38,11 +42,14 @@ class YandexSearchPage(BasePage):
     def should_be_results(self):
         """Проверяет наличие результатов поиска"""
         assert self.is_element_present(*YandexSearchLocators.LIST_OF_RESULTS), \
-            "Отстутсвует таблица с результатами поиска"
+            logger.error("Отстутсвует таблица с результатами поиска")
 
     def the_first_link_directs_to_tensor_ru(self):
         """Проверяет наличие первой ссылки и кликает по ней"""
-        first_link = WebDriverWait(self.browser, 1).until(
-            EC.presence_of_element_located(YandexSearchLocators.FIRST_LINK)
-        )
-        first_link.click()
+        try:
+            first_link = WebDriverWait(self.browser, 1).until(
+                EC.presence_of_element_located(YandexSearchLocators.FIRST_LINK)
+            )
+            first_link.click()
+        except TimeoutException:
+            logger.error("Первая ссылка в результатах отсутствует")

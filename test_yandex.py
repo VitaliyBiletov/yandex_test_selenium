@@ -1,31 +1,58 @@
 from pages.yandex_search_page import YandexSearchPage
 from pages.yandex_images_page import YandexImagesPage
+from loguru import logger
+
+logger.add("./logs/tests_yandex.log", format="{time} {level} {message}")
 
 
 class TestYandex:
     def test_of_the_transition_to_the_tensor_page(self, browser):
+        logger.info("Начало теста 'Поиск в Яндексе'")
         page = YandexSearchPage(browser)
+        logger.debug("Открытие поисковой страницы Яндекса")
         page.go_to_url()
+        logger.debug("Проверка наличия поля поиска")
         page.should_be_input_field()
+        logger.debug("Ввод текста в поле поиска")
         page.entering_text_in_the_input_field()
+        logger.debug("Проверка наличия таблицы с подсказками")
         page.should_be_suggest()
+        logger.debug("Нажатие Enter")
         page.click_to_enter()
+        logger.debug("Проверка появления результатов")
         page.should_be_results()
+        logger.debug("Клик по первой ссылке результатов")
         page.the_first_link_directs_to_tensor_ru()
+        logger.debug("Проверка, что находимcя на сайте тензора")
         page.checking_the_transition_to_the_page("tensor.ru")
+        logger.info("Конец теста 'Поиск в Яндексе'")
 
     def test_images(self, browser):
+        logger.info("Начало теста 'Картинки на Яндексе'")
         page = YandexSearchPage(browser)
+        logger.debug("Открытие поисковой страницы Яндекса")
         page.go_to_url()
         page_images = YandexImagesPage(browser, browser.current_url)
+        logger.debug("Проверка наличия ссылки 'Картинки'")
         page_images.should_be_image_link()
+        logger.debug("Клик по ссылке 'Картинки'")
         page_images.click_to_images_link()
+        logger.debug("Проверка перехода на страницу www.yandex.ru/images")
         page_images.checking_the_transition_to_the_page("https://yandex.ru/images/")
+        logger.debug("Открытие первой категории картинок")
         page_images.open_first_category_images()
+        logger.debug("Проверка наличия в поисковой строке названия категории")
         page_images.should_be_category_in_input_value()
+        logger.debug("Открытие первой картинки")
         page_images.open_first_image()
+        logger.debug("Проверка, что картинка открылась")
         page_images.is_opened_image()
+        logger.debug("Переход к следующей картинке")
         page_images.click_to_next_image()
+        logger.debug("Проверка, что картинка изменилась")
         page_images.is_the_picture_changed()
+        logger.debug("Переход к предыдущей картинке")
         page_images.click_to_prev_image()
+        logger.debug("Проверка, что мы вернулись к исходной картинке")
         page_images.is_the_previous_picture()
+        logger.info("Конец теста 'Картинки на Яндексе'")

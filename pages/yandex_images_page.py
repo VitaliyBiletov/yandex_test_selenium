@@ -1,3 +1,6 @@
+import time
+from loguru import logger
+from selenium.common import TimeoutException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from pages.base_page import BasePage
@@ -21,7 +24,7 @@ class YandexImagesPage(BasePage):
     def should_be_image_link(self):
         """Проверяет наличие ссылки на страницу с картинками"""
         assert self.is_element_present(*YandexImagesLocators.LINK_TO_IMAGES), \
-            "Сслыка на страницу картинки отсутстует"
+            logger.error("Сслыка 'картинки' отсутстует")
 
     def click_to_images_link(self):
         """Получает элемент ссылки и кликает по нему"""
@@ -46,25 +49,31 @@ class YandexImagesPage(BasePage):
         Проверяет что именно та категоря которую мы выбрали отображается в поисковой строке
         """
         input_search = self.browser.find_element(*YandexImagesLocators.INPUT_FIELD)
-        assert input_search.get_attribute("value") == self.category_name, "Неверное название категории"
+        assert input_search.get_attribute("value") == self.category_name, \
+            logger.error("Неверное название категории")
 
     def open_first_image(self):
         """Получает первую картинку и кликает по ней"""
-        first_image = WebDriverWait(self.browser, 3).until(
-            EC.presence_of_element_located(YandexImagesLocators.FIRST_IMAGE)
-        )
-        first_image.click()
+        try:
+            first_image = WebDriverWait(self.browser, 5).until(
+                EC.presence_of_element_located(YandexImagesLocators.FIRST_IMAGE)
+            )
+            first_image.click()
+        except TimeoutException:
+            logger.error("Первая картинка отсутствует")
 
     def is_opened_image(self):
         """
         Проверяет открытие картинки
         Запоминает url прервой картинки в атрибуте first_image_url
         """
+        time.sleep(1)
         image = WebDriverWait(self.browser, 3).until(
             EC.presence_of_element_located(YandexImagesLocators.CURRENT_IMAGE)
         )
         self.first_image_url = image.get_attribute("src")
-        assert self.is_element_present(*YandexImagesLocators.CURRENT_IMAGE), "Ошибка при открытии картинки"
+        assert self.is_element_present(*YandexImagesLocators.CURRENT_IMAGE), \
+            logger.error("Ошибка при открытии картинки")
 
     def click_to_next_image(self):
         """
@@ -79,7 +88,8 @@ class YandexImagesPage(BasePage):
 
     def is_the_picture_changed(self):
         """Проверяет что картинка сменилась"""
-        assert self.first_image_url != self.current_image_url, "Картинка не сменилась"
+        assert self.first_image_url != self.current_image_url, \
+            logger.error("Картинка не сменилась")
 
     def click_to_prev_image(self):
         """
@@ -99,4 +109,6 @@ class YandexImagesPage(BasePage):
             EC.presence_of_element_located(YandexImagesLocators.CURRENT_IMAGE)
         )
         self.current_image_url = image.get_attribute("src")
-        assert self.first_image_url == self.current_image_url, "Первая картинка не совпадает с исходной"
+
+        assert self.first_image_url == self.current_image_url, \
+            logger.error("Первая картинка не совпадает с исходной")
